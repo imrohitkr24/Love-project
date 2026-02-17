@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>For My Love ❤️</title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="light-mode">
     <!-- Custom Cursor -->
     <div id="cursor-trail"></div>
@@ -42,6 +46,9 @@
     <!-- Floating Background Hearts -->
     <div class="floating-hearts-container" id="bg-hearts"></div>
 
+    <!-- Grain Texture -->
+    <div class="grain-overlay"></div>
+
     <!-- MAIN CONTENT -->
     <main>
         <!-- Section 1: Hero -->
@@ -49,11 +56,12 @@
             <div class="hero-content">
                 <h1 class="hero-title">For The Most Beautiful Girl In My World <span class="heart-pulse">❤️</span></h1>
                 <p class="hero-subtitle">This little world is made only for you…</p>
-                <div class="hero-timer">
-                    <p>Together for:</p>
-                    <div id="countdown">Loading...</div>
-                </div>
-                <button id="enter-btn" class="glow-on-hover">Click to Enter My Heart</button>
+                <!-- Countdown removed for simpler design -->
+                <button id="enter-btn" class="simple-btn">Click to Enter My Heart</button>
+            </div>
+            <div class="scroll-indicator"
+                onclick="document.getElementById('love-letter').scrollIntoView({behavior: 'smooth'})">
+                <i class="fas fa-chevron-down"></i>
             </div>
         </section>
 
@@ -77,25 +85,29 @@
                     <!-- Placeholders - User to replace images -->
                     <div class="memory-card" data-tilt>
                         <div class="img-frame heart-shape">
-                            <img src="assets/memory1.jpg" alt="Memory 1" onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+1'">
+                            <img src="assets/memory1.jpg" alt="Memory 1"
+                                onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+1'">
                         </div>
                         <p class="caption">The day we met</p>
                     </div>
                     <div class="memory-card" data-tilt>
                         <div class="img-frame heart-shape">
-                            <img src="assets/memory2.jpg" alt="Memory 2" onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+2'">
+                            <img src="assets/memory2.jpg" alt="Memory 2"
+                                onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+2'">
                         </div>
                         <p class="caption">Our first date</p>
                     </div>
                     <div class="memory-card" data-tilt>
                         <div class="img-frame heart-shape">
-                            <img src="assets/memory3.jpg" alt="Memory 3" onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+3'">
+                            <img src="assets/memory3.jpg" alt="Memory 3"
+                                onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+3'">
                         </div>
                         <p class="caption">Silly moments</p>
                     </div>
                     <div class="memory-card" data-tilt>
                         <div class="img-frame heart-shape">
-                            <img src="assets/memory4.jpg" alt="Memory 4" onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+4'">
+                            <img src="assets/memory4.jpg" alt="Memory 4"
+                                onerror="this.src='https://placehold.co/400x400/pink/white?text=Memory+4'">
                         </div>
                         <p class="caption">Just you being cute</p>
                     </div>
@@ -164,7 +176,7 @@
                     <h1 class="big-love-text">I Love You More Than Words Can Ever Say ❤️</h1>
                     <p class="sub-love-text">Will you always stay with me?</p>
                     <div class="buttons">
-                        <button class="yes-btn" onclick="alert('Yay! I love you! 💖')">Yes, Always!</button>
+                        <button id="final-yes-btn" class="yes-btn">Yes, Always!</button>
                     </div>
                 </div>
             </div>
@@ -185,4 +197,5 @@
     <!-- Main Script -->
     <script src="script.js"></script>
 </body>
+
 </html>
