@@ -9,11 +9,6 @@ const themeBtn = document.getElementById('theme-toggle');
 const themeIcon = themeBtn.querySelector('i');
 const body = document.body;
 
-// --- Date We Met (CONFIGURABLE) ---
-const meetDate = new Date("2020-01-01T00:00:00"); // CHANGE THIS DATE
-
-// --- Countdown Timer Removed for Simplicity ---
-
 // --- Music Control ---
 let isPlaying = false;
 musicBtn.addEventListener('click', () => {
@@ -23,7 +18,7 @@ musicBtn.addEventListener('click', () => {
         musicIcon.classList.add('fa-music');
         musicIcon.style.animation = 'none';
     } else {
-        bgMusic.play().catch(e => alert("Please interact with the page first or check if audio file exists!"));
+        bgMusic.play().catch(e => alert("Interact first!"));
         musicIcon.classList.remove('fa-music');
         musicIcon.classList.add('fa-pause');
         musicIcon.style.animation = 'spin 4s linear infinite';
@@ -43,83 +38,194 @@ themeBtn.addEventListener('click', () => {
     }
 });
 
-// --- Heart Trail Cursor ---
-document.addEventListener('mousemove', (e) => {
-    const heart = document.createElement('div');
-    heart.classList.add('heart-trail');
-    heart.style.left = e.pageX + 'px';
-    heart.style.top = e.pageY + 'px';
+// --- Starry Background (Canvas) ---
+const canvas = document.getElementById('stars');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    // Randomize size and rotation
-    const size = Math.random() * 20 + 10;
-    heart.style.width = size + 'px';
-    heart.style.height = size + 'px';
-    heart.style.transform = `rotate(${Math.random() * 360}deg)`;
+    let stars = [];
+    const numStars = 100;
 
-    document.getElementById('cursor-trail').appendChild(heart);
+    class Star {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2;
+            this.speedX = (Math.random() - 0.5) * 0.2; // Slow movement
+            this.speedY = (Math.random() - 0.5) * 0.2;
+            this.alpha = Math.random();
+        }
 
-    setTimeout(() => {
-        heart.remove();
-    }, 1000);
-});
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
 
-// --- Background Floating Hearts ---
-function createFloatingHearts() {
-    const container = document.getElementById('bg-hearts');
-    const heartCount = 20;
+            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
 
-    for (let i = 0; i < heartCount; i++) {
-        const heart = document.createElement('div');
-        heart.innerHTML = '❤️';
-        heart.classList.add('bg-heart');
-        heart.style.left = Math.random() * 100 + 'vw';
-        heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
-        heart.style.fontSize = (Math.random() * 2 + 1) + 'rem';
-        container.appendChild(heart);
+            this.alpha += (Math.random() - 0.5) * 0.02;
+            if (this.alpha < 0.1) this.alpha = 0.1;
+            if (this.alpha > 0.8) this.alpha = 0.8;
+        }
+
+        draw() {
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
+
+    function initStars() {
+        for (let i = 0; i < numStars; i++) {
+            stars.push(new Star());
+        }
+    }
+    initStars();
+
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(star => {
+            star.update();
+            star.draw();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
 }
-createFloatingHearts();
 
-// --- GSAP Animations ---
+// --- Envelope Logic ---
+const envelope = document.getElementById('envelope');
+const openBtn = document.getElementById('open-btn');
 
-// 1. Hero Entrance
-const tl = gsap.timeline();
-tl.from(".hero-title", { opacity: 0, y: -50, duration: 1.5, ease: "power4.out" })
-    .from(".hero-subtitle", { opacity: 0, y: 20, duration: 1 }, "-=1")
-    .from("#enter-btn", { scale: 0, opacity: 0, rotation: 180, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
+function openEnvelope() {
+    if (!envelope) return;
+    envelope.classList.add('open');
 
-// 2. Button Click Transition
-document.getElementById('enter-btn').addEventListener('click', () => {
-    document.getElementById('love-letter').scrollIntoView({ behavior: 'smooth' });
+    // Smooth scroll to letter after animation
+    setTimeout(() => {
+        document.getElementById('love-letter').scrollIntoView({ behavior: 'smooth' });
+        // Start typing effect slightly after scroll
+        setTimeout(() => startTypewriter(), 800);
+    }, 1500);
+}
 
-    // Trigger typewriter after scroll
-    setTimeout(startTypewriter, 1000);
-});
+if (envelope) envelope.addEventListener('click', openEnvelope);
+if (openBtn) openBtn.addEventListener('click', openEnvelope);
 
-// 3. Typewriter Effect
-const loveMessage = `The day you came into my life, everything changed.
-You are my peace, my happiness, my favorite person.
-I made this just to remind you how special you are to me.
-Every moment with you is a treasure I hold dear.`;
+
+// --- 3D Carousel Logic ---
+const carousel = document.querySelector('.carousel');
+const items = document.querySelectorAll('.carousel-item');
+
+if (carousel && items.length > 0) {
+    const itemCount = items.length;
+    const angle = 360 / itemCount;
+    let currAngle = 0;
+
+    // Arrange items in a circle
+    items.forEach((item, index) => {
+        item.style.transform = `rotateY(${index * angle}deg) translateZ(300px)`; // Increased Z for better spacing
+    });
+
+    // Auto Rotation
+    let autoRotate = setInterval(() => {
+        currAngle -= 0.2;
+        carousel.style.transform = `rotateY(${currAngle}deg)`;
+    }, 20);
+
+    // Interaction (Drag/Swipe) to rotate
+    let isDragging = false;
+    let startX, currentRotate;
+
+    const container = document.querySelector('.carousel-container');
+
+    container.addEventListener('mousedown', (e) => {
+        clearInterval(autoRotate); // Stop auto rotate on interaction
+        isDragging = true;
+        startX = e.pageX;
+        currentRotate = currAngle;
+        carousel.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        if (carousel) carousel.style.cursor = 'grab';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.pageX - startX;
+        currAngle = currentRotate + (dx * 0.5);
+        carousel.style.transform = `rotateY(${currAngle}deg)`;
+    });
+
+    // Touch support
+    container.addEventListener('touchstart', (e) => {
+        clearInterval(autoRotate);
+        startX = e.touches[0].pageX;
+        currentRotate = currAngle;
+    });
+
+    container.addEventListener('touchmove', (e) => {
+        const dx = e.touches[0].pageX - startX;
+        currAngle = currentRotate + (dx * 0.5);
+        carousel.style.transform = `rotateY(${currAngle}deg)`;
+    });
+}
+
+
+// --- Typewriter Effect (Improved) ---
+const loveMessage = `My Dearest Love,
+
+From the moment you stepped into my life, everything became brighter. Your smile is my sunshine, and your laughter is my favorite song.
+
+I never knew what true happiness was until I found you. You are my peace in the chaos, my calm in the storm, and the love I've always dreamed of.
+
+I promise to cherish every moment with you, to support your dreams, and to love you more with every passing day.
+
+You are not just my love; you are my best friend, my soulmate, and my forever.`;
 
 function startTypewriter() {
     const textContainer = document.getElementById('typewriter-text');
-    if (textContainer.innerText.length > 0) return; // Recently run
+    if (!textContainer || textContainer.dataset.typingStarted === "true") return;
+    textContainer.dataset.typingStarted = "true";
 
     let i = 0;
-    const speed = 50;
+    const speed = 30;
 
     function type() {
         if (i < loveMessage.length) {
             textContainer.innerHTML += loveMessage.charAt(i) === '\n' ? '<br>' : loveMessage.charAt(i);
             i++;
             setTimeout(type, speed);
+        } else {
+            gsap.to(".love-quote", {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                stagger: 0.5,
+                ease: "power2.out"
+            });
         }
     }
     type();
 }
 
-// 4. Scroll Reveal Sections
+ScrollTrigger.create({
+    trigger: "#love-letter",
+    start: "top 70%",
+    onEnter: startTypewriter
+});
+
+// --- Scroll Animations ---
 gsap.utils.toArray('.content-section').forEach(section => {
     gsap.to(section, {
         scrollTrigger: {
@@ -134,14 +240,13 @@ gsap.utils.toArray('.content-section').forEach(section => {
     });
 });
 
-// 5. Flip Cards Interaction
+// --- Flip Cards (Reasons) ---
 document.querySelectorAll('.flip-card').forEach(card => {
     card.addEventListener('click', () => {
         card.classList.toggle('flipped');
-        // Small burst effect
         confetti({
-            particleCount: 50,
-            spread: 70,
+            particleCount: 30,
+            spread: 50,
             origin: {
                 x: card.getBoundingClientRect().left / window.innerWidth,
                 y: card.getBoundingClientRect().top / window.innerHeight
@@ -151,108 +256,65 @@ document.querySelectorAll('.flip-card').forEach(card => {
     });
 });
 
-// 6. Final Surprise
+// --- Final Surprise ---
 const surpriseBtn = document.getElementById('surprise-btn');
 const finalMsg = document.getElementById('final-message');
 
-surpriseBtn.addEventListener('click', () => {
-    surpriseBtn.style.display = 'none';
-    finalMsg.style.display = 'block';
+if (surpriseBtn) {
+    surpriseBtn.addEventListener('click', () => {
+        surpriseBtn.style.display = 'none';
+        finalMsg.style.display = 'block';
 
-    gsap.fromTo(finalMsg,
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1.5, ease: "elastic.out(1, 0.3)" }
-    );
+        gsap.fromTo(finalMsg,
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 1.5, ease: "elastic.out(1, 0.3)" }
+        );
 
-    // Fireworks
-    const duration = 5 * 1000;
-    const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+        // Fireworks
+        const duration = 5 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
-    function randomInRange(min, max) {
-        return Math.random() * (max - min) + min;
-    }
+        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
-    const interval = setInterval(function () {
-        const timeLeft = animationEnd - Date.now();
+        const interval = setInterval(function () {
+            const timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            const particleCount = 50 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    });
+}
 
-        if (timeLeft <= 0) {
-            return clearInterval(interval);
-        }
-
-        const particleCount = 50 * (timeLeft / duration);
-        // since particles fall down, start a bit higher than random
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-    }, 250);
-});
-
-// 7. Multi-step Final Button Interaction
+// --- Yes Button ---
 const yesBtn = document.getElementById('final-yes-btn');
 let clickStep = 0;
-const messages = [
-    "Are you sure? 🤔",
-    "Really sure? 🤨",
-    "Think again! 🙄",
-    "Last chance! 😬",
-    "Okay, press this! 💖"
-];
+const messages = ["Are you sure? 🤔", "Really sure? 🤨", "Think again! 🙄", "Last chance! 😬", "Okay, press this! 💖"];
 
-yesBtn.addEventListener('click', () => {
-    if (clickStep < messages.length) {
-        // Change text and animate button
-        yesBtn.innerText = messages[clickStep];
-        gsap.from(yesBtn, { scale: 1.2, duration: 0.2, ease: "back.out(1.7)" });
+if (yesBtn) {
+    yesBtn.addEventListener('click', () => {
+        if (clickStep < messages.length) {
+            yesBtn.innerText = messages[clickStep];
+            gsap.from(yesBtn, { scale: 1.2, duration: 0.2, ease: "back.out(1.7)" });
+            const randomX = (Math.random() - 0.5) * 50;
+            const randomY = (Math.random() - 0.5) * 20;
+            gsap.to(yesBtn, { x: randomX, y: randomY, duration: 0.2 });
+            clickStep++;
+        } else {
+            yesBtn.innerText = "YAY! I KNEW IT! 😍";
+            gsap.to(yesBtn, { scale: 1.5, rotate: 360, duration: 0.5, ease: "elastic.out(1, 0.3)" });
 
-        // Move button slightly to make it playful
-        const randomX = (Math.random() - 0.5) * 50;
-        const randomY = (Math.random() - 0.5) * 20;
-        gsap.to(yesBtn, { x: randomX, y: randomY, duration: 0.2 });
+            // Final Confetti
+            const duration = 3000;
+            const end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 10, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff0000', '#ffa500'] });
+                confetti({ particleCount: 10, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff0000', '#ffa500'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
 
-        clickStep++;
-    } else {
-        // Final Success State
-        yesBtn.innerText = "YAY! I KNEW IT! 😍";
-        gsap.to(yesBtn, { scale: 1.5, rotate: 360, duration: 0.5, ease: "elastic.out(1, 0.3)" });
-
-        // Massive Confetti Explosion
-        const duration = 3000;
-        const end = Date.now() + duration;
-
-        (function frame() {
-            confetti({
-                particleCount: 10,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 },
-                colors: ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff', '#4b0082', '#ee82ee']
-            });
-            confetti({
-                particleCount: 10,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 },
-                colors: ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff', '#4b0082', '#ee82ee']
-            });
-
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
-
-        // Sweet Alert (using standard alert for now as requested, but delayed slightly for effect)
-        setTimeout(() => {
-            alert("I Love You So Much! 💖 Thank you for being mine!");
-        }, 500);
-    }
-});
-
-/* Easter Egg: Click heart 5 times */
-let heartClickCount = 0;
-document.querySelector('.heart-pulse').addEventListener('click', () => {
-    heartClickCount++;
-    if (heartClickCount === 5) {
-        alert("You found a secret! I love you infinitely! ♾️💖");
-        heartClickCount = 0;
-    }
-});
+            setTimeout(() => alert("I Love You So Much! 💖 Thank you for being mine!"), 500);
+        }
+    });
+}
